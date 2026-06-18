@@ -1,0 +1,93 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local SpawnPads = Workspace:WaitForChild("SpawnPads")
+local BlockPile = Workspace:WaitForChild("BlockPile")
+local player = Players.LocalPlayer
+
+local Window = Rayfield:CreateWindow({
+   Name = "Farm Estático (Completo) 🧱",
+   LoadingTitle = "Carregando...",
+   LoadingSubtitle = "Pads + Coleta Invisível",
+   KeySystem = false
+})
+
+local BlueTab = Window:CreateTab("🔵 Time Azul", 4483362458)
+local RedTab = Window:CreateTab("🔴 Time Vermelho", 4483362458)
+local MiscTab = Window:CreateTab("⚙️ Coleta de Blocos", 4483362458)
+
+-- Função para tocar o pad
+local function tocarPad(padName)
+    local pad = SpawnPads:FindFirstChild(padName)
+    if pad and pad:FindFirstChild("TouchInterest") then
+        firetouchinterest(player.Character.HumanoidRootPart, pad, 0)
+        firetouchinterest(player.Character.HumanoidRootPart, pad, 1)
+    end
+end
+
+-- Função de coleta sem teleporte (Reach)
+local function coletarBlocosSemTeleporte()
+    local rootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return end
+    
+    for _, item in pairs(BlockPile:GetChildren()) do
+        local parte = item:IsA("BasePart") and item or item:FindFirstChildWhichIsA("BasePart")
+        if parte then
+            firetouchinterest(rootPart, parte, 0)
+            firetouchinterest(rootPart, parte, 1)
+        end
+    end
+end
+
+-- Criar botões para Pads Azuis
+local padsAzuis = {"BlueBasicPad", "BlueFastPad", "BlueTankPad"}
+for _, nomePad in pairs(padsAzuis) do
+    local ligado = false
+    BlueTab:CreateToggle({
+        Name = "Farm: " .. nomePad,
+        Callback = function(Value)
+            ligado = Value
+            task.spawn(function()
+                while ligado do
+                    tocarPad(nomePad)
+                    task.wait(0.4)
+                end
+            end)
+        end,
+    })
+end
+
+-- Criar botões para Pads Vermelhos
+local padsVermelhos = {"RedBasicPad", "RedFastPad", "RedTankPad"}
+for _, nomePad in pairs(padsVermelhos) do
+    local ligado = false
+    RedTab:CreateToggle({
+        Name = "Farm: " .. nomePad,
+        Callback = function(Value)
+            ligado = Value
+            task.spawn(function()
+                while ligado do
+                    tocarPad(nomePad)
+                    task.wait(0.4)
+                end
+            end)
+        end,
+    })
+end
+
+-- Botão de Coleta
+local coletarAtivo = false
+MiscTab:CreateToggle({
+    Name = "Auto-Coleta Estática (Reach)",
+    Callback = function(Value)
+        coletarAtivo = Value
+        task.spawn(function()
+            while coletarAtivo do
+                coletarBlocosSemTeleporte()
+                task.wait(0.1) 
+            end
+        end)
+    end,
+})
+
+Rayfield:LoadConfiguration()
